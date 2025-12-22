@@ -104,6 +104,9 @@ The above script "writes" the token stored with the key `demoToken` on certain r
 
 # Burp Configuration
 To use the Burp Selenium Extension in a login flow you proceed as you normally would by adding a session validity check.
+
 ![burp-session-config1.png](images/burp-session-config1.png)
+
 The key difference is to add a "dummy" request macro simply so that you can check the box to run an extension after the macro completes.
+
 ![burp-session-config2.png](images/burp-session-config2.png)
