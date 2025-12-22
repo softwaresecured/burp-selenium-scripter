@@ -111,3 +111,9 @@ To use the Burp Selenium Extension in a login flow you proceed as you normally w
 The key difference is to add a "dummy" request macro simply so that you can check the box to run an extension after the macro completes.
 
 ![burp-session-config2.png](images/burp-session-config2.png)
+
+# Tips for building a session handling flow
+- When creating your accounts, copy the QR codes for TOTP MFA. You will need this to configure the TOTP extension.
+- Build a list of markers that identify a logged out request ( timeout/invalidated )
+- Document all required xpaths while performing the login flow
+- Make note of any areas that may take a second to render or areas that have onevents that must fire prior to being used
