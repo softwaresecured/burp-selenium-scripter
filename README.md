@@ -42,10 +42,11 @@ console.log("Demo script complete");
 - You might need to add delays for JavaScript events to happen
 - Scripts will always be disabled on project load because the script execution environment isn't locked down
 
-# A more complicated case involving MFA and an authorization bearer token
+# Advanced case with MFA / authorization header
 Login flows that require the insertion of MFA tokens can be handled with [Multi-TOTP Authenticator](https://github.com/portswigger/multi-totp-authenticator). Simply set the MFA 
-code in the flow to something unique like "321123" and it will be replaced whenever an MFA token is required. To handle
-tracking of header based session tokens after authentication [Hotpatch](https://github.com/portswigger/hotpatch) can be used. By creating a "reader" script
+code in the flow to something unique like "321123" and it will be replaced whenever an MFA token is required. 
+
+To handle tracking of header based session tokens after authentication [Hotpatch](https://github.com/portswigger/hotpatch) can be used. By creating a "reader" script
 you can catch tokens provided after login and store them for later use. A "writer" script can then be used to update the tokens in requests that flow through the proxy.
 
 
