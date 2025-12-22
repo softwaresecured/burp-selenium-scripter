@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'com.softwaresecured'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    def graalsVersion = "24.2.1"
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation "org.graalvm.js:js-language:$graalsVersion"
+    implementation "org.graalvm.polyglot:polyglot:$graalsVersion"
+    implementation "com.fifesoft:rsyntaxtextarea:3.6.0"
+    implementation 'org.seleniumhq.selenium:selenium-java:4.39.0'
+    compileOnly "net.portswigger.burp.extensions:montoya-api:2025.2"
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.findAll {
+            !it.name.endsWith('pom') }collect { it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    shadowJar {
+        archiveClassifier.set('')
+        mergeServiceFiles()
+    }
+
+    build {
+        dependsOn(shadowJar)
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
