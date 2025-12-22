@@ -7,6 +7,10 @@ and [Hotpatch](https://github.com/portswigger/hotpatch) to handle TOTP and track
 - Timeout to prevent resource issues
 - Full JavaScript environment with `seleniumDriver` helper object included for easy creation of flows
 
+# Setup
+- Install the extension
+- Install `chromedriver` for your OS and make sure it is on the `PATH`
+
 # Example usage
 The site Altoro Mutual test site ( `https://demo.testfire.net` ) uses cookie based authentication only and the login 
 process is fairly simple. Although session management for this site can be easily accomplished in Burp's session macro 
