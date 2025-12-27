@@ -20,6 +20,8 @@ public class BurpSeleniumScripterModel extends AbstractModel<BurpSeleniumScripte
     private String scriptOutput = "";
     private ScriptExecutionThread scriptExecutionThread = null;
     private ScriptExecutionState scriptExecutionState = ScriptExecutionState.COMPLETE;
+    private String chromeDriverVersion = null;
+    private String chromeBrowserVersion = null;
 
     public BurpSeleniumScripterModel() {
         super();
@@ -54,6 +56,11 @@ public class BurpSeleniumScripterModel extends AbstractModel<BurpSeleniumScripte
     public void setScriptContent(String scriptContent) {
         this.scriptContent = scriptContent;
         emit(BurpSeleniumScripterModelEvent.SCRIPT_SET, null, scriptContent);
+    }
+
+    public void loadScript(String scriptContent) {
+        this.scriptContent = scriptContent;
+        emit(BurpSeleniumScripterModelEvent.SCRIPT_LOADED, null, scriptContent);
     }
 
     public String getScriptOutput() {
@@ -108,5 +115,23 @@ public class BurpSeleniumScripterModel extends AbstractModel<BurpSeleniumScripte
     public void setTimeoutSec(int timeoutSec) {
         this.timeoutSec = timeoutSec;
         emit(BurpSeleniumScripterModelEvent.SCRIPT_TIMEOUT_SET, null, timeoutSec);
+    }
+
+    public String getChromeDriverVersion() {
+        return chromeDriverVersion;
+    }
+
+    public void setChromeDriverVersion(String chromeDriverVersion) {
+        this.chromeDriverVersion = chromeDriverVersion;
+        emit(BurpSeleniumScripterModelEvent.CHROME_DRIVER_VERSION_SET, null, chromeDriverVersion);
+    }
+
+    public String getChromeBrowserVersion() {
+        return chromeBrowserVersion;
+    }
+
+    public void setChromeBrowserVersion(String chromeBrowserVersion) {
+        this.chromeBrowserVersion = chromeBrowserVersion;
+        emit(BurpSeleniumScripterModelEvent.CHROME_BROWSER_VERSION_SET, null, chromeBrowserVersion);
     }
 }

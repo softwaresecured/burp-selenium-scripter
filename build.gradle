@@ -17,6 +17,7 @@ dependencies {
     implementation "org.graalvm.polyglot:polyglot:$graalsVersion"
     implementation "com.fifesoft:rsyntaxtextarea:3.6.0"
     implementation 'org.seleniumhq.selenium:selenium-java:4.39.0'
+    implementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.39.0'
     compileOnly "net.portswigger.burp.extensions:montoya-api:2025.2"
 }
 

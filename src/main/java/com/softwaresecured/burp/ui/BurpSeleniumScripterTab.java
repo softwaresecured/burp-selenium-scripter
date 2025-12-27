@@ -62,7 +62,7 @@ public class BurpSeleniumScripterTab extends JPanel {
         gbc.weightx = 1;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(new JPanel(),gbc);
+        panel.add(burpSeleniumScripterView.jlblExtensionStatus,gbc);
 
         gbc = new GridBagConstraints();
         gbc.gridx = idx++;

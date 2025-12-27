@@ -10,15 +10,14 @@ import com.softwaresecured.burp.model.BurpSeleniumScripterModel;
 import com.softwaresecured.burp.mvc.AbstractModel;
 import com.softwaresecured.burp.mvc.AbstractView;
 import com.softwaresecured.burp.mvc.MVC;
+import com.softwaresecured.burp.selenium.WebDriverFactory;
 import com.softwaresecured.burp.ui.BurpSeleniumScripterTab;
 import com.softwaresecured.burp.util.Logger;
 import com.softwaresecured.burp.util.MontoyaUtil;
 import com.softwaresecured.burp.view.BurpSeleniumScripterView;
 
 public class BurpSeleniumScripter implements BurpExtension, ExtensionUnloadingHandler  {
-
     private MontoyaConfig config;
-    private MontoyaUtil montoyaUtil;
     private MVC<BurpSeleniumScripterModel, BurpSeleniumScripterView, BurpSeleniumScripterController> burpSeleniumScripter;
 
     @Override
@@ -37,6 +36,7 @@ public class BurpSeleniumScripter implements BurpExtension, ExtensionUnloadingHa
         for (AbstractModel<?> model : getModels()) {
             model.load(config);
         }
+        testAutomation();
     }
 
     private AbstractModel<?>[] getModels() {
@@ -77,6 +77,22 @@ public class BurpSeleniumScripter implements BurpExtension, ExtensionUnloadingHa
     public void extensionUnloaded() {
         for (AbstractModel<?> model : getModels()) {
             model.save(config);
+        }
+    }
+
+    private void testAutomation() {
+        try {
+            burpSeleniumScripter.getModel().setChromeBrowserVersion(WebDriverFactory.getBrowserVersion());
+        }
+        catch ( Exception e ) {
+            Logger.log("ERROR","Could not find chrome browser");
+        }
+
+        try {
+            burpSeleniumScripter.getModel().setChromeDriverVersion(WebDriverFactory.getChromeDriverVersion());
+        }
+        catch ( Exception e ) {
+            Logger.log("ERROR","Could not find chromedriver");
         }
     }
 }

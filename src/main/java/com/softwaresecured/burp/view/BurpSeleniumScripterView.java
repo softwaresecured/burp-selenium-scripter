@@ -13,6 +13,7 @@ import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,8 @@ public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterC
     public JCheckBox jchkEnabled = new JCheckBox("Enabled");
     public JCheckBox jchkHeadless = new JCheckBox("Headless");
     public JSpinner jspnTimeoutSec = new JSpinner(new SpinnerNumberModel(60, 1, 300, 5));
+    public JLabel jlblExtensionStatus = new JLabel("");
+    private Color defaultForeground = jlblExtensionStatus.getForeground();
 
     private final Map<BurpSeleniumScripterModelEvent, EventHandler> handlerMap = new HashMap<>();
 
@@ -60,9 +63,12 @@ public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterC
 
 
     private void buildHandlerMap() {
+        handlerMap.put(BurpSeleniumScripterModelEvent.SCRIPT_LOADED, this::handleScriptLoaded);
         handlerMap.put(BurpSeleniumScripterModelEvent.PROJECT_SETTINGS_LOADED, this::handleProjectSettingsLoaded);
         handlerMap.put(BurpSeleniumScripterModelEvent.OUTPUT_SET, this::handleOutputSet);
         handlerMap.put(BurpSeleniumScripterModelEvent.SCRIPT_EXECUTION_STATE_CHANGED, this::handleScriptExecutionStateChanged);
+        handlerMap.put(BurpSeleniumScripterModelEvent.CHROME_BROWSER_VERSION_SET, this::handleAutomationStatusChanged);
+        handlerMap.put(BurpSeleniumScripterModelEvent.CHROME_DRIVER_VERSION_SET, this::handleAutomationStatusChanged);
     }
 
 
@@ -105,6 +111,19 @@ public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterC
         Event handlers
      */
 
+    private void handleAutomationStatusChanged(Enum<?> evt, Object prev, Object next) {
+
+        boolean configured = getModel().getChromeBrowserVersion() != null && getModel().getChromeDriverVersion() != null;
+        toggleComponents(configured);
+        if ( configured ) {
+            jlblExtensionStatus.setForeground(defaultForeground);
+            jlblExtensionStatus.setText(String.format("Chrome browser %s with chromedriver %s",getModel().getChromeBrowserVersion(),getModel().getChromeDriverVersion()));
+        }
+        else {
+            jlblExtensionStatus.setForeground(Color.RED);
+            jlblExtensionStatus.setText("Chrome browser and compatible chomedriver must be installed");
+        }
+    }
 
     private void handleScriptExecutionStateChanged(Enum<?> evt, Object prev, Object next) {
         ScriptExecutionState state = (ScriptExecutionState) next;
@@ -116,11 +135,30 @@ public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterC
         jtxtOutput.setText(getModel().getScriptOutput());
     }
 
+    private void handleScriptLoaded(Enum<?> evt, Object prev, Object next) {
+        jtxtScriptContent.setText(getModel().getScriptContent() != null ? getModel().getScriptContent() : "");
+    }
+
     private void handleProjectSettingsLoaded(Enum<?> evt, Object prev, Object next) {
         jtxtScriptContent.setText(getModel().getScriptContent() != null ? getModel().getScriptContent() : "");
         jspnTimeoutSec.setValue(getModel().getTimeoutSec());
         jchkEnabled.setSelected(getModel().isEnabled());
         jchkHeadless.setSelected(getModel().isHeadless());
+    }
+
+    /*
+        End of handlers
+     */
+
+    private void toggleComponents( boolean status ) {
+        jtxtScriptContent.setEnabled(status);
+        jbtnToggleExecution.setEnabled(status);
+        jbtnClear.setEnabled(status);
+        jbtnReset.setEnabled(status);
+        jtxtOutput.setEnabled(status);
+        jchkEnabled.setEnabled(status);
+        jchkHeadless.setEnabled(status);
+        jspnTimeoutSec.setEnabled(status);
     }
 }
 

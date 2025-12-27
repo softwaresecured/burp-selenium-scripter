@@ -1,13 +1,8 @@
 package com.softwaresecured.burp.selenium;
 
-import com.softwaresecured.burp.constants.BurpSeleniumScripterConstants;
 import com.softwaresecured.burp.exceptions.BurpSeleniumScripterDriverException;
 import org.openqa.selenium.By;
-import org.openqa.selenium.PageLoadStrategy;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -20,34 +15,19 @@ public class SeleniumDriver {
     private WebDriverWait defaultRenderWait;
 
     private boolean headless = true;
-    private WebDriver driver;
+    private DriverHandle driverHandle;
     private Consumer<Object> updateBurpCookiejarHandler = null;
     public SeleniumDriver(boolean headless) {
         this.headless = headless;
     }
 
     public void init(String proxyHost, int proxyPort) throws BurpSeleniumScripterDriverException {
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments(String.format("--proxy-server=%s:%d", proxyHost, proxyPort));
-        options.addArguments(String.format("--user-data-dir=%s/chrome-profile-%d", System.getProperty("java.io.tmpdir"),System.currentTimeMillis()));
-        if ( headless ) {
-            options.addArguments("--headless=new");
-        }
-        for ( String option : BurpSeleniumScripterConstants.defaultChromeDriverOptions ) {
-            options.addArguments(option);
-        }
-        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
-        try {
-            driver = new ChromeDriver(options);
-            driver.manage().deleteAllCookies();
-        } catch ( Exception e ) {
-            throw new BurpSeleniumScripterDriverException(String.format("Error initializing web driver: %s", e.getMessage()));
-        }
+        driverHandle = WebDriverFactory.createChromeDriver(new ProxyConfig(proxyHost, proxyPort), headless);
         setDefaultRenderWaitTimeSec(defaultRenderWaitTimeSec);
     }
 
     public void setDefaultRenderWaitTimeSec( int sec ) {
-        defaultRenderWait = new WebDriverWait(driver, Duration.ofSeconds(sec));
+        defaultRenderWait = new WebDriverWait(driverHandle.getWebDriver(), Duration.ofSeconds(sec));
     }
 
     public void setUpdateBurpCookiejarHandler(Consumer<Object> updateBurpCookiejarHandler) {
@@ -55,12 +35,12 @@ public class SeleniumDriver {
     }
 
     public SeleniumDriver get( String url ) {
-        driver.get(url);
+        driverHandle.getWebDriver().get(url);
         return this;
     }
 
     public SeleniumDriver waitForElement( String xpath ) {
-        WebElement element = defaultRenderWait.until(
+        defaultRenderWait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.xpath(xpath))
         );
         return this;
@@ -68,39 +48,39 @@ public class SeleniumDriver {
 
     public SeleniumDriver click( String xpath ) {
         waitForElement(xpath);
-        driver.findElement(By.xpath(xpath)).click();
+        driverHandle.getWebDriver().findElement(By.xpath(xpath)).click();
         return this;
     }
 
     public SeleniumDriver sendKeys( String xpath, String keys ) {
         waitForElement(xpath);
-        driver.findElement(By.xpath(xpath)).sendKeys(keys);
+        driverHandle.getWebDriver().findElement(By.xpath(xpath)).sendKeys(keys);
         return this;
     }
 
     public SeleniumDriver delay( int sec ) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(sec));
+        WebDriverWait wait = new WebDriverWait(driverHandle.getWebDriver(), Duration.ofSeconds(sec));
         return this;
     }
 
     public void cleanup() {
-        if ( driver != null ) {
-            try {
-                driver.close();
-            } catch ( Exception ignored ) {
-                ;
-            }
-            try {
-                driver.quit();
-            } catch ( Exception ignored ) {
-                ;
-            }
-        }
+        driverHandle.cleanup();
     }
 
     public void updateCookieJar() {
         if ( updateBurpCookiejarHandler != null ) {
-            updateBurpCookiejarHandler.accept(driver);
+            updateBurpCookiejarHandler.accept(driverHandle.getWebDriver());
+        }
+    }
+
+    public void waitForClose() {
+        while (true) {
+            try {
+                driverHandle.getWebDriver().getTitle();
+                Thread.sleep(100);
+            } catch (WebDriverException | InterruptedException e) {
+                break;
+            }
         }
     }
 }

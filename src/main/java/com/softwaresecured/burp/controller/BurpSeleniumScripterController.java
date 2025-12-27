@@ -151,7 +151,7 @@ public class BurpSeleniumScripterController extends AbstractController<BurpSelen
     }
 
     private void handleScriptReset(Enum<?> evt, Object prev, Object next) {
-        getModel().setScriptContent(ResourceLoader.loadContent("default-script-template.js"));
+        getModel().loadScript(ResourceLoader.loadContent("default-script-template.js"));
         getModel().setScriptOutput("");
     }
 

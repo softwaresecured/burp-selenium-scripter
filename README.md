@@ -116,8 +116,17 @@ The key difference is to add a "dummy" request macro simply so that you can chec
 
 ![burp-session-config2.png](images/burp-session-config2.png)
 
+# Extension configuration
+
+When the extension loads it will perform a check to see if there is a Chrome browser with a compatible chromedriver. If
+this test fails a warning will appear at the bottom left, otherwise the chrome browser and driver versions will be
+displayed. The default script includes instructions on how to quickly get up and running.
+
+![ui.png](images/ui.png)
+
 # Tips for building a session handling flow
 - When creating your accounts, copy the QR codes for TOTP MFA. You will need this to configure the TOTP extension.
 - Build a list of markers that identify a logged out request ( timeout/invalidated )
 - Document all required xpaths while performing the login flow
 - Make note of any areas that may take a second to render or areas that have onevents that must fire prior to being used
+- Click something once you've logged in to allow post login events to run in the target app
