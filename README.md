@@ -76,7 +76,7 @@ function handleHttpResponseReceived(montoyaApi, httpResponseReceived) {
 ```
 The above script reads the access token out of a request and stores it with the key `demoToken` for later use
 
-Hotpatch: Http request sent handler
+## Hotpatch: Http request sent handler
 ```javascript
 var RequestToBeSentAction = Packages.burp.api.montoya.http.handler.RequestToBeSentAction;
 var ResponseReceivedAction = Packages.burp.api.montoya.http.handler.ResponseReceivedAction;
