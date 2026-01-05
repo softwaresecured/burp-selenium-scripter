@@ -19,7 +19,7 @@ public class ScriptExecutionThread extends Thread {
         burpSeleniumScripterModel.setScriptExecutionState(ScriptExecutionState.RUNNING);
         try {
 
-            seleniumReplay = new SeleniumReplay(burpSeleniumScripterModel.getScriptContent(), burpSeleniumScripterModel.getTimeoutSec(), burpSeleniumScripterModel.isHeadless());
+            seleniumReplay = new SeleniumReplay(burpSeleniumScripterModel.getScriptContent(), burpSeleniumScripterModel.getTimeoutSec(), burpSeleniumScripterModel.isHeadless(),burpSeleniumScripterModel.getCollabSecret());
             seleniumReplay.execute();
             StringBuilder sb = new StringBuilder();
             sb.append(seleniumReplay.getStdout());

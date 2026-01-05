@@ -41,6 +41,14 @@ seleniumDriver.updateCookieJar();
 console.log("Demo script complete");
 ```
 
+If the login flow requires a code sent via email you can use the commands below to wait for an email and extract 
+content from it to use later in the flow
+
+```javascript
+.waitForEmailMatchingSubject("Subject: this is a test",10)
+.sendKeysFromEmail("//*[@id=\"query\"]","(\\d+)-(\\d+)","$1$2")
+```
+
 # Tips
 - To update Burp's cookie jar call `updateCookieJar` at the end of your script
 - You might need to add delays for JavaScript events to happen
@@ -122,7 +130,11 @@ When the extension loads it will perform a check to see if there is a Chrome bro
 this test fails a warning will appear at the bottom left, otherwise the chrome browser and driver versions will be
 displayed. The default script includes instructions on how to quickly get up and running.
 
-![ui.png](images/ui.png)
+![ui1.png](images/ui1.png)
+
+The collaborator can be configured and regexes can be tested on the "Collaborator config" tab
+
+![ui2.png](images/ui2.png)
 
 # Tips for building a session handling flow
 - When creating your accounts, copy the QR codes for TOTP MFA. You will need this to configure the TOTP extension.
@@ -130,3 +142,4 @@ displayed. The default script includes instructions on how to quickly get up and
 - Document all required xpaths while performing the login flow
 - Make note of any areas that may take a second to render or areas that have onevents that must fire prior to being used
 - Click something once you've logged in to allow post login events to run in the target app
+- 

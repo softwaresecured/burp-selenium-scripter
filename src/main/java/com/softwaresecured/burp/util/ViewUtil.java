@@ -1,6 +1,7 @@
 package com.softwaresecured.burp.util;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class ViewUtil {
     public static void attachSplitviewResizeListener(JSplitPane splitPane, double pos) {
@@ -9,5 +10,9 @@ public class ViewUtil {
                 splitPane.setDividerLocation(pos);
             }
         });
+    }
+
+    public static void setPreferredWidth(JComponent field, int width) {
+        field.setPreferredSize(new Dimension(width, (int)field.getPreferredSize().getHeight()));
     }
 }

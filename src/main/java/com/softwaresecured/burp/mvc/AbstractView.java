@@ -6,6 +6,7 @@ import com.softwaresecured.burp.event.EventEmitter;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeListener;
 import java.util.concurrent.Callable;
@@ -208,6 +209,12 @@ public abstract class AbstractView<TEvent extends Enum<TEvent>, TModel extends A
 
             }
         });
+    }
+
+    protected void checkRegex(JTextField field) {
+        Color backGround = new JTextField().getBackground();
+        Color foreGround = new JTextField().getForeground();
+        field.getDocument().addDocumentListener(new RegexValidityDocumentListener(field, backGround, foreGround));
     }
 
     public TModel getModel() {

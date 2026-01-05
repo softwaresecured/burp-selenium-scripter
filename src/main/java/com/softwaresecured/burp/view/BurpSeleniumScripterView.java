@@ -1,5 +1,6 @@
 package com.softwaresecured.burp.view;
 
+import burp.api.montoya.collaborator.Interaction;
 import com.softwaresecured.burp.enums.ScriptExecutionState;
 import com.softwaresecured.burp.event.controller.BurpSeleniumScripterControllerEvent;
 import com.softwaresecured.burp.event.model.BurpSeleniumScripterModelEvent;
@@ -7,18 +8,30 @@ import com.softwaresecured.burp.exceptions.BurpSeleniumScripterException;
 import com.softwaresecured.burp.model.BurpSeleniumScripterModel;
 import com.softwaresecured.burp.mvc.AbstractView;
 import com.softwaresecured.burp.mvc.EventHandler;
+import com.softwaresecured.burp.ui.HighlightRange;
+import com.softwaresecured.burp.util.CollaboratorUtil;
 import com.softwaresecured.burp.util.Logger;
+import com.softwaresecured.burp.util.RegexUtil;
+import com.softwaresecured.burp.util.TimeUtil;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterControllerEvent, BurpSeleniumScripterModel, BurpSeleniumScripterModelEvent> {
+    // Scripter
     public RSyntaxTextArea jtxtScriptContent = null;
     public JButton jbtnToggleExecution = new JButton("Test");
     public JButton jbtnClear = new JButton("Clear");
@@ -29,6 +42,23 @@ public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterC
     public JSpinner jspnTimeoutSec = new JSpinner(new SpinnerNumberModel(60, 1, 300, 5));
     public JLabel jlblExtensionStatus = new JLabel("");
     private Color defaultForeground = jlblExtensionStatus.getForeground();
+
+    // collab
+    public JLabel jlblNavPosition = new JLabel("");
+    public JButton jbtnNextCollab = new JButton("Next");
+    public JButton jbtnPreviousCollab = new JButton("Previous");
+    public JButton jbtnSetCollabKey = new JButton("Set collaborator key");
+    public JButton jbtnResetCollabKey = new JButton("Reset collaborator");
+    public JTextField jtxtCollabDomain = new JTextField();
+    public JTextField jtxtCollabSecret = new JTextField();
+    public JTextArea jtxtSmtpInteraction = new JTextArea();
+
+    // regex tester
+    public JTextField jtxtExtractionRegex = new JTextField();
+    public JTextField jtxtFormatString = new JTextField();
+    public JTextField jtxtResultString = new JTextField();
+    public JButton jbtnTestRegex = new JButton("Test");
+
 
     private final Map<BurpSeleniumScripterModelEvent, EventHandler> handlerMap = new HashMap<>();
 
@@ -69,6 +99,15 @@ public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterC
         handlerMap.put(BurpSeleniumScripterModelEvent.SCRIPT_EXECUTION_STATE_CHANGED, this::handleScriptExecutionStateChanged);
         handlerMap.put(BurpSeleniumScripterModelEvent.CHROME_BROWSER_VERSION_SET, this::handleAutomationStatusChanged);
         handlerMap.put(BurpSeleniumScripterModelEvent.CHROME_DRIVER_VERSION_SET, this::handleAutomationStatusChanged);
+        handlerMap.put(BurpSeleniumScripterModelEvent.HIGHLIGHT_ADDED, this::handleRegexHighlightAdded);
+        handlerMap.put(BurpSeleniumScripterModelEvent.HIGHLIGHT_CLEARED, this::handleRegexHighlightRemoved);
+
+        handlerMap.put(BurpSeleniumScripterModelEvent.COLLAB_SECRET_SET, this::handleCollabSecretSet);
+        handlerMap.put(BurpSeleniumScripterModelEvent.COLLAB_DOMAIN_SET, this::handleCollabDomainSet);
+        handlerMap.put(BurpSeleniumScripterModelEvent.INTERACTION_ADDED, this::handleInteractionAdded);
+        handlerMap.put(BurpSeleniumScripterModelEvent.SELECTED_INTERACTION_INDEX_SET, this::handleInteractionIndexSet);
+        handlerMap.put(BurpSeleniumScripterModelEvent.LAST_COLLAB_POLL_UPDATED, this::handleLastCollabPollUpdated);
+
     }
 
 
@@ -81,6 +120,29 @@ public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterC
         attach(jchkEnabled,BurpSeleniumScripterControllerEvent.SCRIPT_ENABLED_TOGGLED);
         attach(jchkHeadless,BurpSeleniumScripterControllerEvent.HEADLESS_TOGGLED);
         attach(jspnTimeoutSec,BurpSeleniumScripterControllerEvent.TIMEOUT_SET);
+
+        attach(jbtnSetCollabKey,BurpSeleniumScripterControllerEvent.SET_COLLAB_KEY_CLICKED);
+        attach(jbtnResetCollabKey,BurpSeleniumScripterControllerEvent.RESET_COLLAB_KEY_CLICKED);
+        attach(jbtnNextCollab,BurpSeleniumScripterControllerEvent.NEXT_INTERACTION_CLICKED);
+        attach(jbtnPreviousCollab,BurpSeleniumScripterControllerEvent.PREV_INTERACTION_CLICKED);
+        checkRegex(jtxtExtractionRegex);
+
+        jbtnTestRegex.addActionListener( actionEvent -> {
+            if (RegexUtil.validateRegex(jtxtExtractionRegex.getText())) {
+                getModel().clearRegexHighlights();
+                Logger.log("INFO","Clearing highlights");
+                for ( HighlightRange highlightRange : CollaboratorUtil.getHighlights(
+                        jtxtSmtpInteraction.getText(),
+                        jtxtExtractionRegex.getText(),
+                        jtxtFormatString.getText()
+                )) {
+                    Logger.log("INFO","Adding highlight");
+                    getModel().addHighlight(highlightRange);
+                }
+                jtxtResultString.setText("");
+            }
+            jtxtResultString.setText(CollaboratorUtil.extractFormattedValue(jtxtSmtpInteraction.getText(),jtxtExtractionRegex.getText(),jtxtFormatString.getText()));
+        });
     }
 
     @Override
@@ -107,9 +169,79 @@ public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterC
         }
     }
 
+    private void updateNav() {
+        int interactionCount = getModel().getSmtpInteractions().size();
+        int idx = getModel().getSelectedInteractionIndex();
+
+        if ( getModel().getSelectedInteractionIndex() == -1 && !getModel().getSmtpInteractions().isEmpty()) {
+            getModel().setSelectedInteractionIndex(0);
+        }
+        jbtnNextCollab.setEnabled(interactionCount > 0 && idx < interactionCount-1);
+        jbtnPreviousCollab.setEnabled(interactionCount > 0 && idx > 0);
+        updateNavStatus();
+    }
+
+    private void updateNavStatus() {
+        String navStatusText = "";
+        int pos = 0;
+        int total = 0;
+        if ( getModel().getSelectedInteractionIndex() >= 0 ) {
+            pos = getModel().getSelectedInteractionIndex() + 1;
+            total = getModel().getSmtpInteractions().size();
+        }
+        navStatusText = String.format("%d/%d - As of %s ", pos,total, TimeUtil.formatTime(getModel().getLastCollaboratorPoll()));
+        jlblNavPosition.setText(navStatusText);
+    }
+
     /*
         Event handlers
      */
+
+    private void handleLastCollabPollUpdated(Enum<?> evt, Object prev, Object next) {
+        updateNav();
+    }
+    private void handleInteractionIndexSet(Enum<?> evt, Object prev, Object next) {
+        String interactionText = "";
+        if ( (Integer)next < getModel().getSmtpInteractions().size()) {
+            Interaction interaction = getModel().getSmtpInteractions().get(getModel().getSelectedInteractionIndex());
+            if ( interaction != null ) {
+                if ( interaction.smtpDetails().isPresent() ) {
+                    interactionText = interaction.smtpDetails().get().conversation();
+                }
+            }
+        }
+        updateNav();
+        jtxtSmtpInteraction.setText(interactionText);
+    }
+
+    private void handleInteractionAdded(Enum<?> evt, Object prev, Object next) {
+        updateNav();
+    }
+
+    private void handleCollabSecretSet(Enum<?> evt, Object prev, Object next) {
+        String text = (String)next;
+        jtxtCollabSecret.setText(text != null ? text : "");
+    }
+
+    private void handleCollabDomainSet(Enum<?> evt, Object prev, Object next) {
+        String domain = (String)next;
+        jtxtCollabDomain.setText(domain != null ? domain : "");
+    }
+    private void handleRegexHighlightAdded(Enum<?> evt, Object prev, Object next) {
+        if ( next != null ) {
+            Highlighter.HighlightPainter painter = new DefaultHighlighter.DefaultHighlightPainter(Color.GREEN);
+            HighlightRange highlightRange = (HighlightRange)next;
+            try {
+                jtxtSmtpInteraction.getHighlighter().addHighlight(highlightRange.getStart(),highlightRange.getEnd(),painter);
+            } catch (BadLocationException ignored) {
+
+            }
+        }
+    }
+
+    private void handleRegexHighlightRemoved(Enum<?> evt, Object prev, Object next) {
+        jtxtSmtpInteraction.getHighlighter().removeAllHighlights();
+    }
 
     private void handleAutomationStatusChanged(Enum<?> evt, Object prev, Object next) {
 
@@ -144,6 +276,9 @@ public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterC
         jspnTimeoutSec.setValue(getModel().getTimeoutSec());
         jchkEnabled.setSelected(getModel().isEnabled());
         jchkHeadless.setSelected(getModel().isHeadless());
+        jtxtCollabDomain.setText(getModel().getCollabDomain());
+        jtxtCollabSecret.setText(getModel().getCollabSecret().toString());
+        updateNav();
     }
 
     /*

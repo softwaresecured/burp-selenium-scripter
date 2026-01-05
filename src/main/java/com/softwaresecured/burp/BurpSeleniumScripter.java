@@ -11,6 +11,7 @@ import com.softwaresecured.burp.mvc.AbstractModel;
 import com.softwaresecured.burp.mvc.AbstractView;
 import com.softwaresecured.burp.mvc.MVC;
 import com.softwaresecured.burp.selenium.WebDriverFactory;
+import com.softwaresecured.burp.threads.CollabMonitorThread;
 import com.softwaresecured.burp.ui.BurpSeleniumScripterTab;
 import com.softwaresecured.burp.util.Logger;
 import com.softwaresecured.burp.util.MontoyaUtil;
@@ -19,7 +20,7 @@ import com.softwaresecured.burp.view.BurpSeleniumScripterView;
 public class BurpSeleniumScripter implements BurpExtension, ExtensionUnloadingHandler  {
     private MontoyaConfig config;
     private MVC<BurpSeleniumScripterModel, BurpSeleniumScripterView, BurpSeleniumScripterController> burpSeleniumScripter;
-
+    private CollabMonitorThread collabMonitorThread = null;
     @Override
     public void initialize(MontoyaApi api) {
         System.setProperty("polyglot.engine.WarnInterpreterOnly", "false");
@@ -37,6 +38,8 @@ public class BurpSeleniumScripter implements BurpExtension, ExtensionUnloadingHa
             model.load(config);
         }
         testAutomation();
+        collabMonitorThread = new CollabMonitorThread(burpSeleniumScripter.getModel());
+        collabMonitorThread.start();
     }
 
     private AbstractModel<?>[] getModels() {
@@ -77,6 +80,12 @@ public class BurpSeleniumScripter implements BurpExtension, ExtensionUnloadingHa
     public void extensionUnloaded() {
         for (AbstractModel<?> model : getModels()) {
             model.save(config);
+        }
+        collabMonitorThread.shutdown();
+        try {
+            collabMonitorThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

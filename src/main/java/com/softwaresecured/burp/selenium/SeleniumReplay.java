@@ -1,5 +1,6 @@
 package com.softwaresecured.burp.selenium;
 
+import burp.api.montoya.collaborator.SecretKey;
 import com.softwaresecured.burp.util.ExceptionUtil;
 import com.softwaresecured.burp.util.Logger;
 import org.graalvm.polyglot.Context;
@@ -21,12 +22,13 @@ public class SeleniumReplay {
     private long startTime = System.currentTimeMillis();
     private boolean completed = false;
     private int maxRuntime;
-    boolean headless;
-    public SeleniumReplay( String script, int maxRuntime, boolean headless ) {
+    private boolean headless;
+
+    public SeleniumReplay( String script, int maxRuntime, boolean headless, SecretKey secretKey ) {
         this.script = script;
         this.maxRuntime = maxRuntime;
         this.headless = headless;
-        seleniumDriver = new SeleniumDriver(headless);
+        seleniumDriver = new SeleniumDriver(headless, secretKey);
     }
 
     public void execute() {

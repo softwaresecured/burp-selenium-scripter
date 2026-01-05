@@ -1,6 +1,7 @@
 package com.softwaresecured.burp.controller;
 
 
+import burp.api.montoya.collaborator.SecretKey;
 import burp.api.montoya.http.message.Cookie;
 import burp.api.montoya.http.message.params.HttpParameter;
 import burp.api.montoya.http.message.params.HttpParameterType;
@@ -20,6 +21,7 @@ import com.softwaresecured.burp.selenium.SeleniumReplay;
 import com.softwaresecured.burp.threads.ScriptExecutionThread;
 import com.softwaresecured.burp.util.Logger;
 import com.softwaresecured.burp.util.MontoyaUtil;
+import com.softwaresecured.burp.util.RegexUtil;
 import com.softwaresecured.burp.util.ResourceLoader;
 import com.softwaresecured.burp.view.BurpSeleniumScripterView;
 import org.openqa.selenium.WebDriver;
@@ -46,7 +48,10 @@ public class BurpSeleniumScripterController extends AbstractController<BurpSelen
         handlerMap.put(BurpSeleniumScripterControllerEvent.SCRIPT_ENABLED_TOGGLED, this::handleEnabledToggled);
         handlerMap.put(BurpSeleniumScripterControllerEvent.TIMEOUT_SET, this::handleTimeoutSet);
 
-
+        handlerMap.put(BurpSeleniumScripterControllerEvent.SET_COLLAB_KEY_CLICKED, this::handleSetCollabKeyClicked);
+        handlerMap.put(BurpSeleniumScripterControllerEvent.RESET_COLLAB_KEY_CLICKED, this::handleResetCollabKeyClicked);
+        handlerMap.put(BurpSeleniumScripterControllerEvent.NEXT_INTERACTION_CLICKED, this::handleNextInteractionClicked);
+        handlerMap.put(BurpSeleniumScripterControllerEvent.PREV_INTERACTION_CLICKED, this::handlePreviousInteractionClicked);
     }
 
     @Override
@@ -81,7 +86,7 @@ public class BurpSeleniumScripterController extends AbstractController<BurpSelen
 
     @Override
     public ActionResult performAction(SessionHandlingActionData sessionHandlingActionData) {
-        SeleniumReplay seleniumReplay = new SeleniumReplay(getModel().getScriptContent(), getModel().getTimeoutSec(), getModel().isHeadless());
+        SeleniumReplay seleniumReplay = new SeleniumReplay(getModel().getScriptContent(), getModel().getTimeoutSec(), getModel().isHeadless(),getModel().getCollabSecret());
         seleniumReplay.getSeleniumDriver().setUpdateBurpCookiejarHandler(this::updateBurpCookiejar);
         seleniumReplay.execute();
         return ActionResult.actionResult(syncCookies(sessionHandlingActionData.request()));
@@ -130,6 +135,38 @@ public class BurpSeleniumScripterController extends AbstractController<BurpSelen
     /*
         Event handlers
      */
+
+    private void handleSetCollabKeyClicked(Enum<?> evt, Object prev, Object next) {
+        String secret = JOptionPane.showInputDialog(
+                MontoyaUtil.getApi().userInterface().swingUtils().suiteFrame(),
+                "Secret",
+                "Set collaborator secret",
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if ( secret != null ) {
+            getModel().setCollabSecret(SecretKey.secretKey(secret));
+            getModel().setCollabDomain(getModel().generateCollabDomain());
+            getModel().loadInteractionHistory();
+        }
+    }
+
+    private void handleResetCollabKeyClicked(Enum<?> evt, Object prev, Object next) {
+        getModel().regenerateCollabKey();
+    }
+
+    private void handleNextInteractionClicked(Enum<?> evt, Object prev, Object next) {
+        int idx = getModel().getSelectedInteractionIndex() + 1;
+        if ( idx >= 0 && idx < getModel().getSmtpInteractions().size() ) {
+            getModel().setSelectedInteractionIndex(idx);
+        }
+    }
+
+    private void handlePreviousInteractionClicked(Enum<?> evt, Object prev, Object next) {
+        int idx = getModel().getSelectedInteractionIndex() - 1;
+        if ( idx >= 0 && idx < getModel().getSmtpInteractions().size() ) {
+            getModel().setSelectedInteractionIndex(idx);
+        }
+    }
 
 
     private void handleHeadlessToggled(Enum<?> evt, Object prev, Object next) {
