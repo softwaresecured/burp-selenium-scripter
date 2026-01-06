@@ -6,10 +6,12 @@ and [Hotpatch](https://github.com/portswigger/hotpatch) to handle TOTP and track
 - Enable browser to test your flow
 - Timeout to prevent resource issues
 - Full JavaScript environment with `seleniumDriver` helper object included for easy creation of flows
+- Handle email MFA with collaborator
 
 # Setup
 - Install the extension
 - Install `chromedriver` for your OS and make sure it is on the `PATH`
+- If everything is working properly the extension will show the chromedriver version in use
 
 # Example usage
 The site Altoro Mutual test site ( `https://demo.testfire.net` ) uses cookie based authentication only and the login 
@@ -142,4 +144,23 @@ The collaborator can be configured and regexes can be tested on the "Collaborato
 - Document all required xpaths while performing the login flow
 - Make note of any areas that may take a second to render or areas that have onevents that must fire prior to being used
 - Click something once you've logged in to allow post login events to run in the target app
-- 
+
+# Selenium driver functions
+
+Every script will have the seleniumDriver object injected into it so that you can control selenium. The following API
+can be used to customize your login flow.
+
+Driver functions ( all return void ):
+- `init(String proxyHost, int proxyPort)` - Initialize the driver
+- `setDefaultRenderWaitTimeSec( int sec )` - Set the default wait for a component to render
+- `updateCookieJar()` - Close the browser and stop the driver
+
+Builder functions ( returns a selenium driver object ):
+- `get( String url )` - Navigate to a url
+- `waitForElement( String xpath )` - Wait for an element to become available
+- `click( String xpath )` - Click an element
+- `sendKeys( String xpath, String keys )` - Keyboard input
+- `delay( int sec )` - Pause for a given time
+- `waitForEmailMatchingRegex( String regex, int maxWaitSec )` - Waits until an email is received matching the given regex
+- `sendKeysFromEmail ( String xpath, String extractionRegex, String formatString )` - Gets text from an email and interpolates the regex match groups into a format string
+- `getFromEmail( String extractionRegex, String formatString )` - Similar to the `get(String url)` function but it gets the URL from the email using a regex and format string

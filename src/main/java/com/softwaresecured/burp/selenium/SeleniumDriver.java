@@ -111,7 +111,7 @@ public class SeleniumDriver {
         }
     }
 
-    public SeleniumDriver waitForEmailMatchingSubject( String regex, int maxWaitSec ) throws BurpSeleniumScripterDriverException {
+    public SeleniumDriver waitForEmailMatchingRegex( String regex, int maxWaitSec ) throws BurpSeleniumScripterDriverException {
         long startTime = System.currentTimeMillis();
         while ( emailInteraction == null ) {
             if ( System.currentTimeMillis()-startTime > (maxWaitSec*1000)) {

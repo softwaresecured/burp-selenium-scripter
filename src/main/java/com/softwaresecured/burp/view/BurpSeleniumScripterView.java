@@ -23,12 +23,8 @@ import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class BurpSeleniumScripterView extends AbstractView<BurpSeleniumScripterControllerEvent, BurpSeleniumScripterModel, BurpSeleniumScripterModelEvent> {
     // Scripter
