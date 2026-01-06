@@ -5,7 +5,7 @@ and [Hotpatch](https://github.com/portswigger/hotpatch) to handle TOTP and track
 
 # Features
 - Enable browser to test your flow
-- Timeout to prevent resource issues
+- Timeout configuration
 - Full JavaScript environment with `seleniumDriver` helper object included for easy creation of flows
 - Handle email MFA with collaborator
 
@@ -22,7 +22,7 @@ editor it can be used to illustrate the usage of the Burp Selenium Scripter.
 Below is a simple script that performs the following actions:
 - Initializes the selenium driver with the host and port of a proxy server ( Burp in most cases )
 - Navigates to the first URL in the login flow
-- Enters the test `admin` in the username and password input fields
+- Enters the text `admin` in the username and password input fields
 - Clicks the submit button
 - Clicks a link available only on a logged in page
 - Updates the burp cookie jar
@@ -108,7 +108,7 @@ function handleHttpRequestToBeSent(montoyaApi, httpRequestToBeSent) {
     return RequestToBeSentAction.continueWith(httpRequestToBeSent);
 }
 ```
-The above script "writes" the token stored with the key `demoToken` on certain requests
+The above script writes the token stored with the key `demoToken` on certain requests
 
 ### High level flow:
 - Burp session handler sees a request is out of session
