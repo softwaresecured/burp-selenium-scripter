@@ -4,7 +4,7 @@ utilizes xpath to target elements. This can be combined with other extensions su
 and [Hotpatch](https://github.com/portswigger/hotpatch) to handle TOTP and tracking of non cookie based session tokens.
 
 # Features
-- Enable browser to test your flow
+- Simple script editor to edit your scripts
 - Timeout configuration
 - Full JavaScript environment with `seleniumDriver` helper object included for easy creation of flows
 - Handle email MFA with collaborator
@@ -143,7 +143,7 @@ The collaborator can be configured and regexes can be tested on the "Collaborato
 - When creating your accounts, copy the QR codes for TOTP MFA. You will need this to configure the TOTP extension.
 - Build a list of markers that identify a logged out request ( timeout/invalidated )
 - Document all required xpaths while performing the login flow
-- Make note of any areas that may take a second to render or areas that have onevents that must fire prior to being used
+- Make note of any areas that may take a second to render or areas that have events that must fire prior to being used
 - Click something once you've logged in to allow post login events to run in the target app
 
 # Selenium driver functions
