@@ -1,3 +1,4 @@
+# 🤖 Burp Selenium Scripter
 Burp Selenium Scripter allows pentesters to script login sequences using a simple builder pattern that
 utilizes xpath to target elements. This can be combined with other extensions such as [Multi-TOTP Authenticator](https://github.com/portswigger/multi-totp-authenticator) 
 and [Hotpatch](https://github.com/portswigger/hotpatch) to handle TOTP and tracking of non cookie based session tokens.
