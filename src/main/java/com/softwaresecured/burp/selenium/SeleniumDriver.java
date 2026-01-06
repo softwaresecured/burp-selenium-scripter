@@ -127,11 +127,27 @@ public class SeleniumDriver {
     }
 
     public SeleniumDriver  sendKeysFromEmail ( String xpath, String extractionRegex, String formatString ) throws BurpSeleniumScripterDriverException {
+        return sendKeys(xpath,getValueFromEmail(extractionRegex,formatString));
+    }
+
+    public SeleniumDriver getFromEmail( String extractionRegex, String formatString ) throws BurpSeleniumScripterDriverException {
+        return get(getValueFromEmail(extractionRegex,formatString));
+    }
+
+    private String getValueFromEmail ( String extractionRegex, String formatString ) throws BurpSeleniumScripterDriverException {
         if ( emailInteraction == null ) {
             throw new BurpSeleniumScripterDriverException("No email interaction found");
         }
-        String text = CollaboratorUtil.extractFormattedValue(emailInteraction.smtpDetails().get().conversation(),extractionRegex,formatString);
-        return sendKeys(xpath,text);
+        if ( emailInteraction.smtpDetails().isPresent() ) {
+            String text = CollaboratorUtil.extractFormattedValue(emailInteraction.smtpDetails().get().conversation(), extractionRegex, formatString);
+            if ( text.equals(formatString)) {
+                throw new BurpSeleniumScripterDriverException("Could not interpolate values in format string");
+            }
+            return text;
+        }
+        else {
+            throw new BurpSeleniumScripterDriverException("Smtp message not present");
+        }
     }
 
 }
