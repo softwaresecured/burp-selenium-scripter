@@ -1,32 +1,33 @@
 # 🤖 Burp Selenium Scripter
 Burp Selenium Scripter allows pentesters to script login sequences using a simple builder pattern that
-utilizes xpath to target elements. This can be combined with other extensions such as [Multi-TOTP Authenticator](https://github.com/portswigger/multi-totp-authenticator) 
-and [Hotpatch](https://github.com/portswigger/hotpatch) to handle TOTP and tracking of non cookie based session tokens.
+utilizes XPath to target elements. This can be combined with other extensions such as [Multi-TOTP Authenticator](https://github.com/portswigger/multi-totp-authenticator) 
+and [Hotpatch](https://github.com/portswigger/hotpatch) to handle TOTP as well as tracking of non-cookie based session tokens.
 
 # Features
-- Simple script editor to edit your scripts
-- Timeout configuration
-- Full JavaScript environment with `seleniumDriver` helper object included for easy creation of flows
-- Handle email MFA with collaborator
+1. Simple script editor to edit your scripts.
+2. Timeout configuration.
+3. Full JavaScript environment with `seleniumDriver` helper object included for easy creation of flows.
+4. Handle email MFA with collaborator.
 
 # Setup
 - Install the extension
-- Install `chromedriver` for your OS and make sure it is on the `PATH`
+- Install `chromedriver` for your OS and make sure it is on the `PATH`. You can obtain chromedriver from the [Chrome release channel](https://googlechromelabs.github.io/chrome-for-testing/#stable).
 - If everything is working properly the extension will show the chromedriver version in use
 
 # Example usage
-The site Altoro Mutual test site ( `https://demo.testfire.net` ) uses cookie based authentication only and the login 
-process is fairly simple. Although session management for this site can be easily accomplished in Burp's session macro 
-editor it can be used to illustrate the usage of the Burp Selenium Scripter.
+For our example we will use the [Altoro Mutual](https://demo.testfire.net) test site. This site uses 
+cookie-based authentication and has a fairly simple login process.
+
+While this could be accomplished with the Burp Suite Session Handling Macros, this example illustrates the capabilities of the Burp Selenium Scripter.
 
 Below is a simple script that performs the following actions:
-- Initializes the selenium driver with the host and port of a proxy server ( Burp in most cases )
-- Navigates to the first URL in the login flow
-- Enters the text `admin` in the username and password input fields
-- Clicks the submit button
-- Clicks a link available only on a logged in page
-- Updates the burp cookie jar
-- Prints some text to the log
+1. Initializes the selenium driver with the host and port of a proxy server ( Burp in most cases ).
+2. Navigates to the first URL in the login flow.
+3. Enters the text `admin` in the username and password input fields.
+4. Clicks the submit button.
+5. Clicks a link available only on a logged in page.
+6. Updates the burp cookie jar.
+7. Prints some text to the log.
 
 ### Sample login script for https://demo.testfire.net
 ```javascript
@@ -44,8 +45,8 @@ seleniumDriver.updateCookieJar();
 console.log("Demo script complete");
 ```
 
-If the login flow requires a code sent via email you can use the commands below to wait for an email and extract 
-content from it to use later in the flow
+If the login flow requires a code sent via email you can use the collaborator domain provided by the extension and then
+use the commands below to wait for an email and extract content from the email to use later in the flow.
 
 ```javascript
 .waitForEmailMatchingSubject("Subject: this is a test",10)
@@ -57,15 +58,15 @@ content from it to use later in the flow
 - You might need to add delays for JavaScript events to happen
 - Scripts will always be disabled on project load because the script execution environment isn't locked down
 
-# Advanced case with MFA / authorization header
+# Advanced case with MFA or Authorization Headers
 Login flows that require the insertion of MFA tokens can be handled with [Multi-TOTP Authenticator](https://github.com/portswigger/multi-totp-authenticator). Simply set the MFA 
 code in the flow to something unique like "321123" and it will be replaced whenever an MFA token is required. 
 
-To handle tracking of header based session tokens after authentication [Hotpatch](https://github.com/portswigger/hotpatch) can be used. By creating a "reader" script
+To handle tracking of header-based session tokens after authentication [Hotpatch](https://github.com/portswigger/hotpatch) can be used. By creating a "reader" script
 you can catch tokens provided after login and store them for later use. A "writer" script can then be used to update the tokens in requests that flow through the proxy.
 
 
-## Hotpatch: Http Response received handler ( reader )
+## Hotpatch: Http Response received Handler ( Reader script )
 
 ```javascript
 var RequestToBeSentAction = Packages.burp.api.montoya.http.handler.RequestToBeSentAction;
@@ -87,7 +88,7 @@ function handleHttpResponseReceived(montoyaApi, httpResponseReceived) {
 ```
 The above script reads the access token out of a request and stores it with the key `demoToken` for later use
 
-## Hotpatch: Http request sent handler
+## Hotpatch: Http Request Sent Handler ( Writer script )
 ```javascript
 var RequestToBeSentAction = Packages.burp.api.montoya.http.handler.RequestToBeSentAction;
 var ResponseReceivedAction = Packages.burp.api.montoya.http.handler.ResponseReceivedAction;
@@ -111,12 +112,12 @@ function handleHttpRequestToBeSent(montoyaApi, httpRequestToBeSent) {
 The above script writes the token stored with the key `demoToken` on certain requests
 
 ### High level flow:
-- Burp session handler sees a request is out of session
-- Invokes the macro which sends a "dummy" request
-- Burp Selenium Scripter is then run and the login process is replayed
-- The hotpatch "reader" script picks up the token and stores it
-- The original request is resent
-- The hotpatch "writer" script updates teh request with the new token
+1. Burp session handler sees a request is out of session.
+2. Invokes the macro which sends a "dummy" request.
+3. Burp Selenium Scripter is then run and the login process is replayed.
+4. The hotpatch "reader" script picks up the token and stores it.
+5. The original request is resent.
+6. The hotpatch "writer" script updates the request with the new token.
 
 # Burp Configuration
 To use the Burp Selenium Extension in a login flow you proceed as you normally would by adding a session validity check.
@@ -135,18 +136,18 @@ displayed. The default script includes instructions on how to quickly get up and
 
 ![ui1.png](images/ui1.png)
 
-The collaborator can be configured and regexes can be tested on the "Collaborator config" tab
+Your Burp Suite Colloborator details and regexes for parsing inbound emails can be tested by selecting the 'Collaborator config' tab.
 
 ![ui2.png](images/ui2.png)
 
-# Tips for building a session handling flow
+# Tips For Building a Session Handling Flow
 - When creating your accounts, copy the QR codes for TOTP MFA. You will need this to configure the TOTP extension.
-- Build a list of markers that identify a logged out request ( timeout/invalidated )
-- Document all required xpaths while performing the login flow
-- Make note of any areas that may take a second to render or areas that have events that must fire prior to being used
-- Click something once you've logged in to allow post login events to run in the target app
+- Build a list of markers that identify a logged out request ( timeout/invalidated ).
+- Document all required XPaths while performing the login flow.
+- Make note of any areas that may take a second to render or areas that have events that must fire prior to being used.
+- Click something once you've logged in to allow post login events to run in the target app.
 
-# Selenium driver functions
+# Selenium Driver Functions
 
 Every script will have the seleniumDriver object injected into it so that you can control selenium. The following API
 can be used to customize your login flow.
@@ -157,11 +158,11 @@ Driver functions ( all return void ):
 - `updateCookieJar()` - Close the browser and stop the driver
 
 Builder functions ( returns a selenium driver object ):
-- `get( String url )` - Navigate to a url
-- `waitForElement( String xpath )` - Wait for an element to become available
-- `click( String xpath )` - Click an element
-- `sendKeys( String xpath, String keys )` - Keyboard input
+- `get( String url )` - Navigate to a URL
+- `waitForElement( String XPath )` - Wait for an element to become available
+- `click( String XPath )` - Click an element
+- `sendKeys( String XPath, String keys )` - Keyboard input
 - `delay( int sec )` - Pause for a given time
 - `waitForEmailMatchingRegex( String regex, int maxWaitSec )` - Waits until an email is received matching the given regex
-- `sendKeysFromEmail ( String xpath, String extractionRegex, String formatString )` - Gets text from an email and interpolates the regex match groups into a format string
+- `sendKeysFromEmail ( String XPath, String extractionRegex, String formatString )` - Gets text from an email and interpolates the regex match groups into a format string
 - `getFromEmail( String extractionRegex, String formatString )` - Similar to the `get(String url)` function but it gets the URL from the email using a regex and format string
