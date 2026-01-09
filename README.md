@@ -4,15 +4,15 @@ utilizes XPath to target elements. This can be combined with other extensions su
 and [Hotpatch](https://github.com/portswigger/hotpatch) to handle TOTP as well as tracking of non-cookie based session tokens.
 
 # Features
-1. Simple script editor to edit your scripts.
-2. Timeout configuration.
-3. Full JavaScript environment with `seleniumDriver` helper object included for easy creation of flows.
-4. Handle email MFA with collaborator.
+- Simple script editor to edit your scripts.
+- Timeout configuration.
+- Full JavaScript environment with `seleniumDriver` helper object included for easy creation of flows.
+- Handle email MFA with collaborator.
 
 # Setup
-- Install the extension
-- Install `chromedriver` for your OS and make sure it is on the `PATH`. You can obtain chromedriver from the [Chrome release channel](https://googlechromelabs.github.io/chrome-for-testing/#stable).
-- If everything is working properly the extension will show the chromedriver version in use
+1. Install the extension
+2. Install `chromedriver` for your OS and make sure it is on the `PATH`. You can obtain chromedriver from the [Chrome release channel](https://googlechromelabs.github.io/chrome-for-testing/#stable).
+3. If everything is working properly the extension will show the chromedriver version in use
 
 # Example usage
 For our example we will use the [Altoro Mutual](https://demo.testfire.net) test site. This site uses 
@@ -54,9 +54,9 @@ use the commands below to wait for an email and extract content from the email t
 ```
 
 # Tips
-- To update Burp's cookie jar call `updateCookieJar` at the end of your script
-- You might need to add delays for JavaScript events to happen
-- Scripts will always be disabled on project load because the script execution environment isn't locked down
+- To update Burp's cookie jar call `updateCookieJar` at the end of your script.
+- You might need to add delays for JavaScript events to happen.
+- Scripts will always be disabled on project load because the script execution environment isn't locked down.
 
 # Advanced case with MFA or Authorization Headers
 Login flows that require the insertion of MFA tokens can be handled with [Multi-TOTP Authenticator](https://github.com/portswigger/multi-totp-authenticator). Simply set the MFA 
