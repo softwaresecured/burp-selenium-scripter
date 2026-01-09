@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CollabUtilTests {
     private String testEmail = """
-            220 ss-1.ca Burp Collaborator Server ready
+            220 blah.local Burp Collaborator Server ready
             EHLO pwnz0ne.softwaresecuredlab.com
             250-Hello
             250 STARTTLS
@@ -25,13 +25,13 @@ public class CollabUtilTests {
             250 Hello
             MAIL FROM:<test@localhost>
             250 OK
-            RCPT TO:<blah@fp8hsatag48v5atoaxm117785zbpze.ss-1.ca>
+            RCPT TO:<blah@fp8hsatag48v5atoaxm117785zbpze.blah.local.ca>
             250 OK
             DATA
             354 Send data
             Received: from localhost (localhost [127.0.0.1])
             	by pwnz0ne.softwaresecuredlab.com (Postfix) with SMTP id 6BE5221C276D
-            	for <blah@fp8hsatag48v5atoaxm117785zbpze.ss-1.ca>; Mon,  5 Jan 2026 11:50:26 -0500 (EST)
+            	for <blah@fp8hsatag48v5atoaxm117785zbpze.blah.local.ca>; Mon,  5 Jan 2026 11:50:26 -0500 (EST)
             Subject: this is a test
             Message-Id: <20260105165026.6BE5221C276D@pwnz0ne.softwaresecuredlab.com>
             Date: Mon,  5 Jan 2026 11:50:26 -0500 (EST)
