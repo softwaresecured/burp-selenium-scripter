@@ -28,6 +28,10 @@ public class SeleniumDriver {
         initCollaborator(secretKey);
     }
 
+    public SeleniumDriver(boolean headless) {
+        this.headless = headless;
+    }
+
     private void initCollaborator( SecretKey secretKey ) {
         collaboratorClient = MontoyaUtil.getApi().collaborator().restoreClient(secretKey);
         Interaction lastInteraction = getLastSmtpInteraction();
@@ -86,7 +90,11 @@ public class SeleniumDriver {
     }
 
     public SeleniumDriver delay( int sec ) {
-        WebDriverWait wait = new WebDriverWait(driverHandle.getWebDriver(), Duration.ofSeconds(sec));
+        try {
+            Thread.sleep(1000L*sec);
+        } catch (InterruptedException ignored) {
+            ;
+        }
         return this;
     }
 
